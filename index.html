@@ -17,8 +17,26 @@
   <link rel="stylesheet" href="components.css?v=3">
   <link rel="stylesheet" href="animations.css?v=3">
   <link rel="stylesheet" href="responsive.css?v=3">
+  <!-- Force browser to never cache this HTML -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
 </head>
 <body data-theme="light">
+  <!-- NUCLEAR FIX: Kill ALL old service workers and their caches BEFORE anything else runs.
+       This ensures stale files (like old share-modal.js) can never be served from SW cache. -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(regs) {
+        regs.forEach(function(r) { r.unregister(); });
+      });
+    }
+    if ('caches' in window) {
+      caches.keys().then(function(names) {
+        return Promise.all(names.map(function(n) { return caches.delete(n); }));
+      });
+    }
+  </script>
 
   <!-- Loading Screen -->
   <div id="splash-screen" class="splash-screen">
