@@ -181,7 +181,7 @@
 
   function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(() => { /* SW registration failed, app still works */ });
+      navigator.serviceWorker.register('sw.js?v=3').catch(() => { /* SW registration failed, app still works */ });
     }
   }
 

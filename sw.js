@@ -10,7 +10,7 @@
  * When offline, notification actions are queued locally and replayed when back online.
  */
 
-const CACHE_NAME = 'giolynk-v2';
+const CACHE_NAME = 'giolynk-v3';
 
 const STATIC_ASSETS = [
   '/',
@@ -51,7 +51,14 @@ const STATIC_ASSETS = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(STATIC_ASSETS))
+      .then(cache =>
+        // Cache each file individually so one failure doesn't block the rest
+        Promise.allSettled(
+          STATIC_ASSETS.map(url =>
+            cache.add(url).catch(() => console.warn('[SW] Failed to cache:', url))
+          )
+        )
+      )
       .then(() => self.skipWaiting())
   );
 });
