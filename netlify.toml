@@ -1,21 +1,51 @@
 [build]
   publish = "."
 
+# Security headers (no COOP/COEP — they break Firebase Google Sign-In popups)
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Cache-Control = "public, max-age=3600"
 
+# HTML: never cache — always serve fresh
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+# Service Worker: never cache — browser must always check for updates
 [[headers]]
   for = "/sw.js"
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
 
+# Manifest: short cache
 [[headers]]
   for = "/manifest.json"
   [headers.values]
     Cache-Control = "no-cache"
     Content-Type = "application/manifest+json"
+
+# JS/CSS: cache for 5 min (short enough for quick updates, long enough for performance)
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=300, must-revalidate"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=300, must-revalidate"
+
+# Images/icons: cache for 1 day
+[[headers]]
+  for = "/*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/*.svg"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
