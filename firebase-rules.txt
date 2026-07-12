@@ -1,0 +1,317 @@
+// ═══════════════════════════════════════════════════════════════════════
+// GIOLYNK - Cloud Firestore Security Rules
+// ═══════════════════════════════════════════════════════════════════════
+// Deploy to: Firebase Console → Firestore Database → Rules tab
+// Project: giolynk
+// ═══════════════════════════════════════════════════════════════════════
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper Functions ────────────────────────────────────────────────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function getUserRole() {
+      return getUserData().role;
+    }
+
+    function getUserSchoolId() {
+      return getUserData().schoolId;
+    }
+
+    function isAdminOrAbove() {
+      return isAuthenticated() && getUserRole() in ['owner', 'admin', 'co-admin'];
+    }
+
+    function isModeratorOrAbove() {
+      return isAuthenticated() && getUserRole() in ['owner', 'admin', 'co-admin', 'moderator'];
+    }
+
+    function isSchoolMember(schoolId) {
+      return isAuthenticated() && getUserSchoolId() == schoolId;
+    }
+
+    function isSchoolAdminOrAbove(schoolId) {
+      let school = get(/databases/$(database)/documents/schools/$(schoolId)).data;
+      return isAuthenticated() &&
+        (request.auth.uid == school.ownerId ||
+         (request.auth.uid in school.admins) ||
+         getUserRole() in ['owner', 'admin']);
+    }
+
+    // Timestamp validation (prevent spoofing)
+    function isValidTimestamp(field) {
+      return field is timestamp;
+    }
+
+    // ── Users ───────────────────────────────────────────────────────────
+    match /users/{userId} {
+      // Anyone authenticated can read profiles
+      allow read: if isAuthenticated();
+
+      // Only the user themselves can create their own doc (handled by auth.js on registration)
+      allow create: if isOwner(userId);
+
+      // Users can update their own profile; admins can update any profile
+      allow update: if isOwner(userId) || isAdminOrAbove();
+
+      // Only the user or admins can delete
+      allow delete: if isOwner(userId) || isAdminOrAbove();
+    }
+
+    // ── Schools ─────────────────────────────────────────────────────────
+    match /schools/{schoolId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isSchoolAdminOrAbove(schoolId);
+      allow delete: if isAuthenticated() && isSchoolAdminOrAbove(schoolId) && getUserRole() == 'owner';
+    }
+
+    // ── Posts ───────────────────────────────────────────────────────────
+    match /posts/{postId} {
+      // Read: must be authenticated and member of the post's school
+      allow read: if isAuthenticated() && isSchoolMember(resource.data.schoolId);
+
+      // Create: must be authenticated, member of target school
+      allow create: if isAuthenticated() &&
+        isSchoolMember(request.resource.data.schoolId) &&
+        request.resource.data.authorId == request.auth.uid &&
+        isValidTimestamp(request.resource.data.createdAt);
+
+      // Update: author or moderator+
+      allow update: if isAuthenticated() &&
+        (resource.data.authorId == request.auth.uid || isModeratorOrAbove());
+
+      // Delete: author or moderator+
+      allow delete: if isAuthenticated() &&
+        (resource.data.authorId == request.auth.uid || isModeratorOrAbove());
+    }
+
+    // ── Comments ────────────────────────────────────────────────────────
+    match /comments/{commentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        request.resource.data.authorId == request.auth.uid &&
+        isValidTimestamp(request.resource.data.createdAt);
+      allow update: if isAuthenticated() &&
+        (resource.data.authorId == request.auth.uid || isModeratorOrAbove());
+      allow delete: if isAuthenticated() &&
+        (resource.data.authorId == request.auth.uid || isModeratorOrAbove());
+    }
+
+    // ── Likes ───────────────────────────────────────────────────────────
+    match /likes/{likeId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // ── Saved Posts ─────────────────────────────────────────────────────
+    match /savedPosts/{savedId} {
+      allow read, create, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // ── Groups ──────────────────────────────────────────────────────────
+    match /groups/{groupId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() &&
+        (request.auth.uid in resource.data.admins || isModeratorOrAbove());
+      allow delete: if isModeratorOrAbove();
+    }
+
+    // ── Group Members ───────────────────────────────────────────────────
+    match /groupMembers/{memberId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow delete: if isAuthenticated() &&
+        (resource.data.userId == request.auth.uid || isModeratorOrAbove());
+    }
+
+    // ── Conversations ───────────────────────────────────────────────────
+    match /conversations/{conversationId} {
+      allow read: if isAuthenticated() && request.auth.uid in resource.data.participants;
+      allow create: if isAuthenticated() && request.auth.uid in request.resource.data.participants;
+      allow update: if isAuthenticated() && request.auth.uid in resource.data.participants;
+      allow delete: if isModeratorOrAbove();
+    }
+
+    // ── Events ──────────────────────────────────────────────────────────
+    match /events/{eventId} {
+      allow read: if isAuthenticated() && isSchoolMember(resource.data.schoolId);
+      allow create: if isModeratorOrAbove();
+      allow update: if isModeratorOrAbove();
+      allow delete: if isModeratorOrAbove();
+    }
+
+    // ── Event RSVPs ─────────────────────────────────────────────────────
+    match /eventRSVPs/{rsvpId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // ── Competitions ────────────────────────────────────────────────────
+    match /competitions/{competitionId} {
+      allow read: if isAuthenticated() && isSchoolMember(resource.data.schoolId);
+      allow create: if isModeratorOrAbove();
+      allow update: if isModeratorOrAbove();
+      allow delete: if isModeratorOrAbove();
+    }
+
+    // ── Competition Entries ─────────────────────────────────────────────
+    match /competitionEntries/{entryId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // ── Friend Requests ─────────────────────────────────────────────────
+    match /friendRequests/{requestId} {
+      allow read: if isAuthenticated() &&
+        (resource.data.fromId == request.auth.uid || resource.data.toId == request.auth.uid);
+      allow create: if isAuthenticated() && request.resource.data.fromId == request.auth.uid;
+      allow update: if isAuthenticated() &&
+        (resource.data.fromId == request.auth.uid || resource.data.toId == request.auth.uid);
+      allow delete: if isAuthenticated() &&
+        (resource.data.fromId == request.auth.uid || resource.data.toId == request.auth.uid);
+    }
+
+    // ── Friends ─────────────────────────────────────────────────────────
+    match /friends/{friendId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow delete: if isAuthenticated();
+    }
+
+    // ── Notifications (Firestore copy for history) ─────────────────────
+    match /notifications/{notifId} {
+      // Only the recipient can read their own notifications
+      allow read: if isAuthenticated() && resource.data.recipientId == request.auth.uid;
+      // System or users can create notifications
+      allow create: if isAuthenticated();
+      // Recipient can mark as read; moderators can update
+      allow update: if isAuthenticated() &&
+        (resource.data.recipientId == request.auth.uid || isModeratorOrAbove());
+      // Only recipient or moderator can delete
+      allow delete: if isAuthenticated() &&
+        (resource.data.recipientId == request.auth.uid || isModeratorOrAbove());
+    }
+
+    // ── Reports ─────────────────────────────────────────────────────────
+    match /reports/{reportId} {
+      allow read: if isModeratorOrAbove();
+      allow create: if isAuthenticated() && request.resource.data.reporterId == request.auth.uid;
+      allow update: if isModeratorOrAbove();
+    }
+
+    // ── Poll Votes ──────────────────────────────────────────────────────
+    match /pollVotes/{voteId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// GIOLYNK - Firebase Realtime Database Security Rules
+// ═══════════════════════════════════════════════════════════════════════
+// Deploy to: Firebase Console → Realtime Database → Rules tab
+// Project: giolynk
+// ═══════════════════════════════════════════════════════════════════════
+//
+// The Realtime Database is used for:
+//   - User online/offline presence (real-time dot indicators)
+//   - Typing indicators in chat
+//   - Message seen/read receipts
+//   - Unread message counts (real-time counter)
+//   - FCM token storage (for push notifications)
+//   - Live tournament brackets (if used)
+//   - Chat message streaming (real-time messages)
+//
+
+{
+  "rules": {
+    // ── User Presence (online/offline status) ──────────────────────────
+    // Each user writes their own presence state.
+    // The ".info/connected" special rule auto-cleans on disconnect.
+    "presence": {
+      "$uid": {
+        ".read": true,
+        ".write": "$uid === auth.uid"
+      }
+    },
+
+    // ── Typing Indicators ──────────────────────────────────────────────
+    // Users write their own typing status per conversation.
+    "typing": {
+      "$conversationId": {
+        "$uid": {
+          ".read": true,
+          ".write": "$uid === auth.uid"
+        }
+      }
+    },
+
+    // ── Message Seen/Read Receipts ─────────────────────────────────────
+    "seen": {
+      "$conversationId": {
+        "$uid": {
+          ".read": true,
+          ".write": "$uid === auth.uid"
+        }
+      }
+    },
+
+    // ── Unread Message Counts ──────────────────────────────────────────
+    // Each user has a node with conversationId: count entries.
+    "unread": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "auth != null"
+      }
+    },
+
+    // ── FCM Push Tokens ────────────────────────────────────────────────
+    // Stores device FCM tokens for server-side push notification delivery.
+    // Used by Cloud Functions or Admin SDK to send targeted push messages.
+    "fcmTokens": {
+      "$uid": {
+        // Only the token owner can read/write their own tokens
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    },
+
+    // ── Chat Messages (Real-time streaming) ────────────────────────────
+    // Messages are streamed in real-time via RTDB for instant delivery.
+    // Firestore is the source of truth; RTDB is the live delivery channel.
+    "messages": {
+      "$conversationId": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        "$messageId": {
+          ".read": "auth != null",
+          ".write": "auth != null"
+        }
+      }
+    },
+
+    // ── Live Tournament/Competition Brackets ───────────────────────────
+    "tournaments": {
+      ".read": true,
+      ".write": "auth != null"
+    }
+  }
+}

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#00897B" id="theme-color-meta">
+  <meta name="description" content="GIOLYNK - Link Up, Level Up. A private social network for students.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GIOLYNK">
+  <title>GIOLYNK - Link Up, Level Up</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="animations.css">
+  <link rel="stylesheet" href="responsive.css">
+</head>
+<body data-theme="light">
+
+  <!-- Loading Screen -->
+  <div id="splash-screen" class="splash-screen">
+    <div class="splash-content">
+      <div class="splash-logo">
+        <svg viewBox="0 0 100 100" class="splash-icon">
+          <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="4"/>
+          <text x="50" y="58" text-anchor="middle" font-size="28" font-weight="800" fill="currentColor">GK</text>
+        </svg>
+      </div>
+      <h1 class="splash-title">GIOLYNK</h1>
+      <p class="splash-tagline">Link Up, Level Up</p>
+      <div class="splash-loader">
+        <div class="loader-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auth Screens -->
+  <div id="auth-container" class="auth-container hidden">
+    <!-- Login -->
+    <div id="login-screen" class="auth-screen">
+      <div class="auth-header">
+        <div class="auth-logo">
+          <svg viewBox="0 0 100 100" class="logo-icon"><circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="4"/><text x="50" y="58" text-anchor="middle" font-size="28" font-weight="800" fill="currentColor">GK</text></svg>
+        </div>
+        <h1>Welcome Back</h1>
+        <p>Sign in to your GIOLYNK account</p>
+      </div>
+      <form id="login-form" class="auth-form">
+        <div class="form-group">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" placeholder="your@email.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <div class="password-input">
+            <input type="password" id="login-password" placeholder="Enter your password" required autocomplete="current-password">
+            <button type="button" class="toggle-password" data-target="login-password" aria-label="Toggle password visibility">
+              <span class="eye-icon">👁</span>
+            </button>
+          </div>
+        </div>
+        <div class="form-options">
+          <label class="checkbox-label">
+            <input type="checkbox" id="remember-me"> Remember me
+          </label>
+          <a href="#" id="forgot-password-link" class="link">Forgot password?</a>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="login-btn">
+          <span class="btn-text">Sign In</span>
+          <span class="btn-loader hidden"><span class="spinner"></span></span>
+        </button>
+        <div class="divider"><span>or</span></div>
+        <button type="button" class="btn btn-google btn-full" id="google-login-btn">
+          <svg class="google-icon" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          <span>Continue with Google</span>
+        </button>
+      </form>
+      <div class="auth-footer">
+        <p>Don't have an account? <a href="#" id="show-register" class="link">Sign Up</a></p>
+      </div>
+    </div>
+
+    <!-- Register -->
+    <div id="register-screen" class="auth-screen hidden">
+      <div class="auth-header">
+        <button class="btn-back" id="back-to-login" aria-label="Back to login">←</button>
+        <h1>Create Account</h1>
+        <p>Join your school community</p>
+      </div>
+      <form id="register-form" class="auth-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="reg-firstname">First Name</label>
+            <input type="text" id="reg-firstname" placeholder="John" required>
+          </div>
+          <div class="form-group">
+            <label for="reg-lastname">Last Name</label>
+            <input type="text" id="reg-lastname" placeholder="Doe" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="reg-email">Email</label>
+          <input type="email" id="reg-email" placeholder="your@email.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="reg-password">Password</label>
+          <div class="password-input">
+            <input type="password" id="reg-password" placeholder="Min 8 characters" required minlength="8">
+            <button type="button" class="toggle-password" data-target="reg-password" aria-label="Toggle password visibility">
+              <span class="eye-icon">👁</span>
+            </button>
+          </div>
+          <div class="password-strength" id="password-strength">
+            <div class="strength-bar"><div class="strength-fill"></div></div>
+            <span class="strength-text"></span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="reg-confirm">Confirm Password</label>
+          <input type="password" id="reg-confirm" placeholder="Repeat password" required>
+        </div>
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="agree-terms" required>
+            <span>I agree to the <a href="#" class="link">Terms of Service</a> and <a href="#" class="link">Privacy Policy</a></span>
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="register-btn">
+          <span class="btn-text">Create Account</span>
+          <span class="btn-loader hidden"><span class="spinner"></span></span>
+        </button>
+        <div class="divider"><span>or</span></div>
+        <button type="button" class="btn btn-google btn-full" id="google-register-btn">
+          <svg class="google-icon" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          <span>Continue with Google</span>
+        </button>
+      </form>
+      <div class="auth-footer">
+        <p>Already have an account? <a href="#" id="show-login" class="link">Sign In</a></p>
+      </div>
+    </div>
+
+    <!-- Forgot Password -->
+    <div id="forgot-screen" class="auth-screen hidden">
+      <div class="auth-header">
+        <button class="btn-back" id="back-to-login-forgot" aria-label="Back to login">←</button>
+        <h1>Reset Password</h1>
+        <p>We'll send you a reset link</p>
+      </div>
+      <form id="forgot-form" class="auth-form">
+        <div class="form-group">
+          <label for="forgot-email">Email</label>
+          <input type="email" id="forgot-email" placeholder="your@email.com" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="forgot-btn">
+          <span class="btn-text">Send Reset Link</span>
+          <span class="btn-loader hidden"><span class="spinner"></span></span>
+        </button>
+      </form>
+      <div class="auth-footer">
+        <p>Remember your password? <a href="#" id="back-to-login-link" class="link">Sign In</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Onboarding -->
+  <div id="onboarding-container" class="onboarding-container hidden">
+    <div class="onboarding-progress">
+      <div class="progress-step active" data-step="1"><span>1</span></div>
+      <div class="progress-line"><div class="progress-fill"></div></div>
+      <div class="progress-step" data-step="2"><span>2</span></div>
+      <div class="progress-line"><div class="progress-fill"></div></div>
+      <div class="progress-step" data-step="3"><span>3</span></div>
+    </div>
+
+    <!-- Step 1: Profile Setup -->
+    <div id="onboard-step-1" class="onboard-step">
+      <div class="onboard-header">
+        <h2>Set Up Your Profile</h2>
+        <p>Tell us a bit about yourself</p>
+      </div>
+      <div class="avatar-upload" id="avatar-upload">
+        <div class="avatar-preview" id="avatar-preview">
+          <span class="avatar-placeholder">📷</span>
+        </div>
+        <button type="button" class="btn btn-outline btn-sm" id="change-avatar-btn">Add Photo</button>
+        <input type="file" id="avatar-input" accept="image/*" class="hidden">
+      </div>
+      <div class="form-group">
+        <label for="onboard-username">Username</label>
+        <input type="text" id="onboard-username" placeholder="Choose a unique username" required>
+        <span class="form-hint" id="username-availability"></span>
+      </div>
+      <div class="form-group">
+        <label for="onboard-bio">Bio</label>
+        <textarea id="onboard-bio" placeholder="Tell us about yourself..." maxlength="200" rows="3"></textarea>
+        <span class="char-count"><span id="bio-count">0</span>/200</span>
+      </div>
+      <button class="btn btn-primary btn-full" id="onboard-next-1">Continue</button>
+    </div>
+
+    <!-- Step 2: Join School -->
+    <div id="onboard-step-2" class="onboard-step hidden">
+      <div class="onboard-header">
+        <h2>Join Your School</h2>
+        <p>Enter a code, scan QR, or search</p>
+      </div>
+      <div class="join-methods">
+        <div class="join-tab active" data-method="code">Enter Code</div>
+        <div class="join-tab" data-method="search">Search</div>
+        <div class="join-tab" data-method="create">Create School</div>
+      </div>
+      <div id="join-code" class="join-method active">
+        <div class="form-group">
+          <input type="text" id="school-code-input" placeholder="Enter school code (e.g. GIOLYNK-XXXX)" class="code-input">
+        </div>
+        <button class="btn btn-primary btn-full" id="join-by-code-btn">Join School</button>
+        <div class="qr-section">
+          <p class="text-center">or</p>
+          <button class="btn btn-outline btn-full" id="scan-qr-btn">
+            <span>📷</span> Scan QR Code
+          </button>
+        </div>
+      </div>
+      <div id="join-search" class="join-method hidden">
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="school-search-input" placeholder="Search schools...">
+        </div>
+        <div id="school-search-results" class="search-results-list"></div>
+      </div>
+      <div id="join-create" class="join-method hidden">
+        <div class="form-group">
+          <label for="create-school-name">School Name</label>
+          <input type="text" id="create-school-name" placeholder="e.g. Lincoln High School">
+        </div>
+        <div class="form-group">
+          <label for="create-school-type">School Type</label>
+          <select id="create-school-type">
+            <option value="university">University</option>
+            <option value="college">College</option>
+            <option value="high_school">High School</option>
+            <option value="middle_school">Middle School</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="create-school-location">Location</label>
+          <input type="text" id="create-school-location" placeholder="City, Country">
+        </div>
+        <button class="btn btn-primary btn-full" id="create-school-btn">Create School</button>
+      </div>
+      <button class="btn btn-ghost btn-full" id="onboard-skip-2">Skip for now</button>
+    </div>
+
+    <!-- Step 3: Select Interests -->
+    <div id="onboard-step-3" class="onboard-step hidden">
+      <div class="onboard-header">
+        <h2>Pick Your Interests</h2>
+        <p>We'll personalize your feed</p>
+      </div>
+      <div class="interests-grid" id="interests-grid"></div>
+      <button class="btn btn-primary btn-full" id="onboard-finish">Get Started</button>
+      <button class="btn btn-ghost btn-full" id="onboard-skip-3">Skip</button>
+    </div>
+  </div>
+
+  <!-- Main App Shell -->
+  <div id="app-shell" class="app-shell hidden">
+    <!-- Top Bar -->
+    <header class="top-bar" id="top-bar">
+      <div class="top-bar-left">
+        <h1 class="app-title" id="page-title">GIOLYNK</h1>
+      </div>
+      <div class="top-bar-right">
+        <button class="icon-btn" id="theme-toggle-btn" aria-label="Toggle theme">
+          <span class="theme-icon-light hidden">🌙</span>
+          <span class="theme-icon-dark">☀️</span>
+        </button>
+        <button class="icon-btn" id="notification-btn" aria-label="Notifications">
+          <span>🔔</span>
+          <span class="badge hidden" id="notification-badge">0</span>
+        </button>
+        <button class="icon-btn" id="search-btn" aria-label="Search">
+          <span>🔍</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Search Overlay -->
+    <div id="search-overlay" class="search-overlay hidden">
+      <div class="search-header">
+        <button class="btn-back" id="close-search">←</button>
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="global-search-input" placeholder="Search people, posts, groups...">
+        </div>
+      </div>
+      <div class="search-tabs">
+        <button class="search-tab active" data-tab="all">All</button>
+        <button class="search-tab" data-tab="people">People</button>
+        <button class="search-tab" data-tab="posts">Posts</button>
+        <button class="search-tab" data-tab="groups">Groups</button>
+      </div>
+      <div id="search-results" class="search-results"></div>
+    </div>
+
+    <!-- Page Content Area -->
+    <main class="page-content" id="page-content">
+      <!-- Pages are rendered here dynamically -->
+    </main>
+
+    <!-- Create Post FAB & Modal -->
+    <button class="fab" id="create-fab" aria-label="Create post">✏️</button>
+
+    <div id="create-modal" class="modal hidden">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content create-post-modal">
+        <div class="modal-header">
+          <h3>Create Post</h3>
+          <button class="modal-close" id="close-create-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="create-post-user" id="create-post-user"></div>
+          <textarea id="post-content-input" placeholder="What's on your mind?" rows="4"></textarea>
+          <div id="post-media-preview" class="media-preview hidden"></div>
+          <div class="post-type-selector">
+            <button class="type-btn" data-type="image" title="Add image">🖼️</button>
+            <button class="type-btn" data-type="poll" title="Create poll">📊</button>
+            <button class="type-btn" data-type="announcement" title="Announcement">📢</button>
+          </div>
+          <div id="poll-options-container" class="poll-options hidden">
+            <input type="text" class="poll-option-input" placeholder="Option 1">
+            <input type="text" class="poll-option-input" placeholder="Option 2">
+            <button class="btn btn-ghost btn-sm" id="add-poll-option">+ Add Option</button>
+          </div>
+          <input type="file" id="post-image-input" accept="image/*,video/*" class="hidden">
+          <div class="post-settings">
+            <label class="toggle-label">
+              <span>Announcement (Admin only)</span>
+              <input type="checkbox" id="post-announcement-toggle">
+              <span class="toggle-switch"></span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary btn-full" id="submit-post-btn">Post</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Viewer Modal -->
+    <div id="image-viewer" class="image-viewer hidden">
+      <button class="viewer-close" id="close-viewer">&times;</button>
+      <img id="viewer-image" src="" alt="Full size image">
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav" id="bottom-nav">
+      <button class="nav-item active" data-page="home" aria-label="Home">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Home</span>
+      </button>
+      <button class="nav-item" data-page="discover" aria-label="Discover">
+        <span class="nav-icon">🧭</span>
+        <span class="nav-label">Discover</span>
+      </button>
+      <button class="nav-item" data-page="create" aria-label="Create" id="nav-create">
+        <span class="nav-icon nav-create-icon">✏️</span>
+      </button>
+      <button class="nav-item" data-page="chats" aria-label="Chats">
+        <span class="nav-icon">💬</span>
+        <span class="nav-label">Chats</span>
+        <span class="badge hidden" id="chat-badge">0</span>
+      </button>
+      <button class="nav-item" data-page="profile" aria-label="Profile">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">Profile</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Confirm Dialog -->
+  <div id="confirm-dialog" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content confirm-modal">
+      <h3 id="confirm-title">Are you sure?</h3>
+      <p id="confirm-message"></p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="confirm-cancel">Cancel</button>
+        <button class="btn btn-danger" id="confirm-ok">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+  <script src="firebase-init.js"></script>
+  <script src="utils.js"></script>
+  <script src="components.js"></script>
+  <script src="auth.js"></script>
+  <script src="router.js"></script>
+  <script src="feed.js"></script>
+  <script src="chat.js"></script>
+  <script src="profile.js"></script>
+  <script src="discover.js"></script>
+  <script src="groups.js"></script>
+  <script src="competitions.js"></script>
+  <script src="events.js"></script>
+  <script src="notifications.js"></script>
+  <script src="search.js"></script>
+  <script src="create-post.js"></script>
+  <script src="reputation.js"></script>
+  <script src="admin.js"></script>
+  <script src="moderation.js"></script>
+  <script src="app.js"></script>
+
+  <!-- Subtle creator credit -->
+  <div id="giolynk-credit" style="position:fixed;bottom:calc(var(--nav-height,64px) + var(--safe-bottom,0px) + 6px);left:50%;transform:translateX(-50%);font-size:10px;color:var(--text-tertiary);opacity:0.45;pointer-events:none;z-index:var(--z-base,1);white-space:nowrap;letter-spacing:0.3px;transition:opacity 0.3s">Created by Giobari Daniel</div>
+  <script>
+    document.addEventListener('pageChange', function(e) {
+      var c = document.getElementById('giolynk-credit');
+      if (!c) return;
+      var mainPages = ['home','discover','chats','profile','school','settings'];
+      c.style.display = mainPages.includes(e.detail.page) ? '' : 'none';
+    });
+    document.addEventListener('click', function(e) {
+      var c = document.getElementById('giolynk-credit');
+      if (!c) return;
+      if (e.target.closest('.modal:not(.hidden)') || e.target.closest('.search-overlay:not(.hidden)')) {
+        c.style.display = 'none';
+      } else {
+        c.style.display = '';
+      }
+    });
+  </script>
+</body>
+</html>
